@@ -85,6 +85,29 @@ export default class Game extends Phaser.Scene {
       fill: "#000",
     });
 
+    this.tiempo = 30;
+    this.timeText = this.add.text(600, 16, `Time: ${this.tiempo}`, {
+        fontSize: "32px",
+        fill: "#000",
+    });
+
+    this.time.addEvent({
+      delay: 1000, // 1000 ms = 1 segundo
+      callback: () => {
+        if (this.tiempo > 0) {
+          this.tiempo--;
+          this.timeText.setText(`Time: ${this.tiempo}`);
+        } else {
+          this.timeGO = true; // Marca el final del tiempo
+          this.timeText.setText(`Time's Up!`);
+          this.timeText.setColor("red");
+          this.gameOver = true; // Activa el estado de Game Over
+        }
+      },
+      callbackScope: this,
+      loop: true,
+    });
+
     this.physics.add.collider(this.player, this.platforms);
 
     this.physics.add.collider(this.stars, this.platforms);
@@ -125,6 +148,34 @@ export default class Game extends Phaser.Scene {
     if (this.cursors.up.isDown && this.player.body.touching.down) {
       this.player.setVelocityY(-330);
     }
+
+    if (this.gameOver === true) {
+      this.input.keyboard.on("keydown-R", function (event) {
+        this.scene.restart();
+      }, this);
+    }
+
+    if (this.gameOver === true) {
+      this.gameovertext = this.add.text(100, 250, "Game Over", {
+        fontSize: "100px",
+        fill: "red"
+      })
+      this.restartText = this.add.text(130,335, "Presiona R para reiniciar", {
+        fontSize: "32px",
+        fill: "#000"
+      })
+      this.physics.pause();
+
+      this.player.setTint(0xff0000);
+  
+      this.player.anims.play("turn");
+      if (this.timeGO === true){
+        this.timeText.setX(600)
+        this.timeText.setText(`Time's Up!`);
+        this.timeText.setColor("red")
+      }
+    }
+
   }
 
   collectStar(player, star) {
